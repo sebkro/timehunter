@@ -1,3 +1,4 @@
+import { LocationService } from './services/location/location.service';
 import { PlaceMarkerService } from './services/marker/place-marker.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -22,7 +23,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     environment.production ? ServiceWorkerModule.register('ngsw-worker.js') : []
   ],
   exports : [],
-  providers: [PlaceMarkerService],
+  providers: [PlaceMarkerService, LocationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

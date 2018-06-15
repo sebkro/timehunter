@@ -1,3 +1,4 @@
+import { LocationService } from './services/location/location.service';
 import { PlaceMarkerService } from './services/marker/place-marker.service';
 import { Component, ViewChild, OnInit, Inject } from '@angular/core';
 import { } from '@types/googlemaps';
@@ -26,7 +27,8 @@ import {
 export class AppComponent implements OnInit {
   title = 'Raw';
 
-  constructor(private markerService: PlaceMarkerService) { }
+  constructor(private markerService: PlaceMarkerService,
+    private locationService: LocationService) { }
 
   @ViewChild('gmap') gmapElement: any;
   map: google.maps.Map;
@@ -37,6 +39,7 @@ export class AppComponent implements OnInit {
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
+    this.locationService.findStartingPoint(53.5422562, 9.9891803).subscribe(res => alert(JSON.stringify(res)));
     this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
