@@ -1,4 +1,5 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { PlaceMarkerService } from './services/marker/place-marker.service';
+import { Component, ViewChild, OnInit, Inject } from '@angular/core';
 import { } from '@types/googlemaps';
 import {
   trigger,
@@ -24,8 +25,8 @@ import {
 })
 export class AppComponent implements OnInit {
   title = 'Raw';
-  private latitude;
-  private longitude;
+
+  constructor(private markerService: PlaceMarkerService) { }
 
   @ViewChild('gmap') gmapElement: any;
   map: google.maps.Map;
@@ -41,11 +42,7 @@ export class AppComponent implements OnInit {
       navigator.geolocation.getCurrentPosition(
         success => {
           this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
-          const marker = new google.maps.Marker({
-            position: new google.maps.LatLng(success.coords.latitude, success.coords.longitude),
-            map: this.map,
-            title: 'Hello World!'
-          });
+          this.markerService.setPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
         }, error => {
           alert('bla');
         });
