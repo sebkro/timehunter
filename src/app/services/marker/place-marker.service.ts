@@ -6,11 +6,23 @@ export class PlaceMarkerService {
 
   constructor() { }
 
-  setPositionMarker(googleMap: google.maps.Map, latitude: number, longitude: number): google.maps.Marker {
+  setOwnPositionMarker(googleMap: google.maps.Map, latitude: number, longitude: number): google.maps.Marker {
     return new google.maps.Marker({
       position: new google.maps.LatLng(latitude, longitude),
       map: googleMap,
-      title: 'Hello World!'
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 8
+      },
+      title: 'This is you!'
+    });
+  }
+
+  setTargetPositionMarker(googleMap: google.maps.Map, latitude: number, longitude: number): google.maps.Marker {
+    return new google.maps.Marker({
+      position: new google.maps.LatLng(latitude, longitude),
+      map: googleMap,
+      title: 'Target!'
     });
   }
 

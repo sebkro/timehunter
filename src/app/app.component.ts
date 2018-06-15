@@ -55,7 +55,7 @@ export class AppComponent implements OnInit {
           this.positionMarker.setPosition(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
         } else {
           map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
-          this.positionMarker = this.markerService.setPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
+          this.positionMarker = this.markerService.setOwnPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
         }
         console.log('new Position: ' + success.coords.latitude + ' ' + success.coords.longitude);
         setTimeout(() => this.updatePosition(map), 5000);
