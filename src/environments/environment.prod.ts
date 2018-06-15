@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  locationServiceUrl: 'https://igsepa-lunch-location.cfapps.io/'
+  locationServiceUrl: 'https://us-central1-cgihunt.cloudfunctions.net/app/timehunter'
 };

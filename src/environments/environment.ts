@@ -5,6 +5,6 @@
 
 export const environment = {
   production: false,
-  locationServiceUrl: 'http://localhost:9001'
+  locationServiceUrl: 'https://us-central1-cgihunt.cloudfunctions.net/app/timehunter'
 
 };
