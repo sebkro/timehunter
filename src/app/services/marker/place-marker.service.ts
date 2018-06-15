@@ -6,7 +6,7 @@ export class PlaceMarkerService {
 
   constructor() { }
 
-  setPositionMarker(googleMap: google.maps.Map, latitude: number, longitude: number) {
+  setPositionMarker(googleMap: google.maps.Map, latitude: number, longitude: number): google.maps.Marker {
     return new google.maps.Marker({
       position: new google.maps.LatLng(latitude, longitude),
       map: googleMap,
