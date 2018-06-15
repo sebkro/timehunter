@@ -24,6 +24,8 @@ import {
 })
 export class AppComponent implements OnInit {
   title = 'Raw';
+  private latitude;
+  private longitude;
 
   @ViewChild('gmap') gmapElement: any;
   map: google.maps.Map;
@@ -35,6 +37,23 @@ export class AppComponent implements OnInit {
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
     this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        success => {
+          this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
+          const marker = new google.maps.Marker({
+            position: new google.maps.LatLng(success.coords.latitude, success.coords.longitude),
+            map: this.map,
+            title: 'Hello World!'
+          });
+        }, error => {
+          alert('bla');
+        });
+    }
+
+  }
+
+
   }
 
 }
