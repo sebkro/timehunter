@@ -1,0 +1,80 @@
+body {
+  padding-top: 54px;
+}
+
+.form-group {
+    width: 100%;
+}
+
+.form-group label {
+    width: 100%;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+/*-------------------------------------------------- */
+.first-row {
+  background-repeat: no-repeat;
+  background-size : cover;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(78, 78, 78, 0.59);
+}
+.first-row-content {
+  background-color: #000000f0;
+  color: grey;
+  border-radius: 10px;
+}
+
+.list-group-item {
+  cursor: pointer;
+}
+
+.list-group {
+  margin-bottom: 10px;
+}
+
+.list-group-item:hover {
+  background-color: grey;
+  color: white;
+}
+
+.active-location {
+  background-color: grey;
+  color: white
+}
+
+body {
+  padding-top: 56px;
+}
+.first-row {
+  background-image : url('/assets/background-3007395_960_720.jpg');
+}
+
+@media (max-width: 991px) {
+  body {
+    padding-top: 0px;
+  }
+  .first-row {
+    background-image : url('/assets/background-3007395_960_720_mobile.jpg');
+  }
+}
+
+

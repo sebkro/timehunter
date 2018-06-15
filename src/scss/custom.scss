@@ -1,0 +1,152 @@
+/*!
+ * Bootstrap v4.0.0-beta (https://getbootstrap.com)
+ * Copyright 2011-2017 The Bootstrap Authors
+ * Copyright 2011-2017 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
+
+
+ $main-color: #004D40;
+ $color-blue-dark: #0D5580;
+ $color-blue-light: #488BB3;
+ $color-red-dark: #5A2016;
+ $color-red-light: #800D10;
+
+
+ $teal-50: #E0F2F1;
+ $teal-100: #B2DFDB;
+ $teal-200: #80CBC4;
+ $teal-300: #4DB6AC;
+ $teal-400: #26A69A;
+ $teal-500: #009688;
+ $teal-600: #00897B;
+ $teal-700: #00796B;
+ $teal-800: #00695C;
+ $teal-900: $main-color;
+
+ $primary: $main-color;
+ $secondary: $color-blue-light;
+
+ $teal-50-alpha: #e0f2f1d9;
+
+
+ @import "functions";
+ @import "variables";
+ @import "mixins";
+//  @import "print";
+ @import "reboot";
+ @import "type";
+ @import "images";
+ @import "code";
+ @import "grid";
+ @import "tables";
+ @import "forms";
+ @import "buttons";
+//  @import "transitions";
+ @import "dropdown";
+//  @import "button-group";
+//  @import "input-group";
+//  @import "custom-forms";
+//  @import "nav";
+ @import "navbar";
+ @import "card";
+//  @import "breadcrumb";
+//  @import "pagination";
+//  @import "badge";
+//  @import "jumbotron";
+//  @import "alert";
+//  @import "progress";
+//  @import "media";
+ @import "list-group";
+ @import "close";
+//  @import "modal";
+//  @import "tooltip";
+//  @import "popover";
+//  @import "carousel";
+ @import "utilities";
+
+
+body {
+  padding-top: 54px;
+  background-color: $teal-50-alpha;
+}
+.form-group {
+    width: 100%;
+}
+
+.form-group label {
+    width: 100%;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.bg-dark {
+  background-color: $main-color!important;
+}
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+/*-------------------------------------------------- */
+.first-row {
+  background-repeat: no-repeat;
+  background-size : cover;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(78, 78, 78, 0.59);
+}
+.first-row-content {
+  background-color: $teal-50-alpha;
+  border-radius: 10px;
+}
+
+.list-group-item {
+  cursor: pointer;
+}
+
+.list-group {
+  margin-bottom: 10px;
+}
+
+.list-group-item:hover {
+  background-color: grey;
+  color: white;
+}
+
+.active-location {
+  background-color: grey;
+  color: white
+}
+
+body {
+  padding-top: 56px;
+}
+.first-row {
+  background-image : url('/assets/background-3007395_960_720.jpg');
+}
+
+@media (max-width: 991px) {
+  body {
+    padding-top: 0px;
+  }
+  .first-row {
+    background-image : url('/assets/background-3007395_960_720_mobile.jpg');
+  }
+}
+
+
+
