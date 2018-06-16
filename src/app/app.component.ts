@@ -23,6 +23,7 @@ export class AppComponent implements OnInit {
   title = 'Raw';
   map: google.maps.Map;
   debug = true;
+  menuSlider = false;
 
   private positionMarker: google.maps.Marker;
   private target: Location;
@@ -165,6 +166,27 @@ export class AppComponent implements OnInit {
       });
       this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
     }
+
+    public navClicked() {
+      console.log('NavClicked');
+      if (this.menuSlider === true) {
+        this.menuSlider = false;
+      } else {
+        this.menuSlider = true;
+      }
+    }
+
+    public restartGame() {
+      if (this.targetMarker) {
+        this.targetMarker.setMap(null);
+      }
+      if (this.blanksMarker) {
+        this.blanksMarker.forEach(elem => elem.setMap(null));
+      }
+      localStorage.clear();
+      this.initGame();
+    }
+
 
 }
 
