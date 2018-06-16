@@ -22,11 +22,15 @@ import { PlaceMarkerService } from './services/marker/place-marker.service';
 export class AppComponent implements OnInit {
   title = 'Raw';
   map: google.maps.Map;
+  debug = true;
   menuSlider = false;
 
   private positionMarker: google.maps.Marker;
-  private targetMarker: google.maps.Marker;
   private target: Location;
+  private targetMarker: google.maps.Marker;
+  private blanks: Location[] = [];
+  private blanksMarker: google.maps.Marker[] = [];
+  private state: GameState;
 
 
 
@@ -34,6 +38,7 @@ export class AppComponent implements OnInit {
   readonly BLANKS_KEY = 'blanks';
   readonly TARGET_KEY = 'target';
   readonly STATE_KEY = 'state';
+  readonly MAX_DISTANCE_IN_KM = 0.05;
 
 
   @ViewChild('gmap') gmapElement: any;
@@ -55,10 +60,12 @@ export class AppComponent implements OnInit {
       this.updateUserPosition();
       if (GameState.PRESTART === localStorage.getItem(this.STATE_KEY)) {
         this.target = JSON.parse(localStorage.getItem(this.STARTING_POINT_KEY));
-        this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
+        const marker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
+        this.targetMarker = marker;
       } else if (GameState.RUNNING === localStorage.getItem(this.STATE_KEY)) {
-        console.log('GameState Running');
-
+        this.blanks = JSON.parse(localStorage.getItem(this.BLANKS_KEY));
+        this.target = JSON.parse(localStorage.getItem(this.TARGET_KEY));
+        this.addMarkerForTargetAndBlanks();
       } else {
         this.initGame();
       }
@@ -87,25 +94,102 @@ export class AppComponent implements OnInit {
           this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
           this.positionMarker = this.markerService.setOwnPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
         }
-        if (this.target) {
-          console.log('new Position: ' + success.coords.latitude + ' ' + success.coords.longitude);
-        }
-        setTimeout(() => this.updateUserPosition(), 15000);
+        this.checkIfTargetReached(success.coords);
+        this.checkIfBlankReached(success.coords);
+        setTimeout(() => this.updateUserPosition(), 5000);
       }, error => {
         alert('Fehler bei der Positionsermittlung');
       });
-  }
+    }
 
-  public navClicked() {
-        console.log('NavClicked');
-        if (this.menuSlider === true) {
-          this.menuSlider = false;
-        } else {
-          this.menuSlider = true;
+    private checkIfTargetReached(position: Coordinates) {
+      if (this.target) {
+        const distance = this.locationService.calcDistance(this.target.latitude, this.target.longitude,
+          position.latitude, position.longitude);
+        if (distance < this.MAX_DISTANCE_IN_KM) {
+          this.handleTargetReached();
         }
-  }
+      }
+    }
+
+    private checkIfBlankReached(position: Coordinates) {
+      if (this.blanks) {
+        const newBlanks = [];
+        const newBlanksMarker = [];
+        for (let i = 0; i < this.blanks.length; i++) {
+          const distance = this.locationService.calcDistance(this.blanks[i].latitude, this.blanks[i].longitude,
+            position.latitude, position.longitude);
+            const maxDisance = this.debug ? 1 : this.MAX_DISTANCE_IN_KM;
+            if (distance >= maxDisance) {
+              newBlanks[newBlanks.length] = this.blanks[i];
+              newBlanksMarker[newBlanksMarker.length] = this.blanksMarker[i];
+            } else {
+              this.blanksMarker[i].setMap(null);
+            }
+        }
+        this.blanks = newBlanks;
+        this.blanksMarker = newBlanksMarker;
+      }
+    }
+
+    public handleBlankReached(marker: google.maps.Marker) {
+      marker.setMap(null);
+    }
+
+    targetMarkerClicked() {
+      this.handleTargetReached();
+    }
+
+    public handleTargetReached() {
+      this.locationService.getNextPoints(this.target.latitude, this.target.longitude).subscribe(newLocations => {
+        localStorage.setItem(this.STATE_KEY, GameState.RUNNING);
+        localStorage.removeItem(this.STARTING_POINT_KEY);
+        this.blanks = newLocations.filter(location => location.niete);
+        this.target = newLocations.find(location => !location.niete);
+        localStorage.setItem(this.BLANKS_KEY, JSON.stringify(this.blanks));
+        localStorage.setItem(this.TARGET_KEY, JSON.stringify(this.target));
+        this.addMarkerForTargetAndBlanks();
+      });
+    }
+
+    private addMarkerForTargetAndBlanks() {
+      if (this.blanksMarker) {
+        this.blanksMarker.forEach(elem => elem.setMap(null));
+      }
+      if (this.targetMarker) {
+        this.targetMarker.setMap(null);
+      }
+
+      this.blanks.forEach(blank => {
+        const blankMarker = this.markerService.setTargetPositionMarker(this.map, blank.latitude, blank.longitude);
+        this.blanksMarker[this.blanksMarker.length] = blankMarker;
+      });
+      this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
+    }
+
+    public navClicked() {
+      console.log('NavClicked');
+      if (this.menuSlider === true) {
+        this.menuSlider = false;
+      } else {
+        this.menuSlider = true;
+      }
+    }
+
+    public restartGame() {
+      if (this.targetMarker) {
+        this.targetMarker.setMap(null);
+      }
+      if (this.blanksMarker) {
+        this.blanksMarker.forEach(elem => elem.setMap(null));
+      }
+      localStorage.clear();
+      this.initGame();
+    }
+
 
 }
+
 
 
 enum GameState {
