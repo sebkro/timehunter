@@ -22,7 +22,7 @@ import { PlaceMarkerService } from './services/marker/place-marker.service';
 export class AppComponent implements OnInit {
   title = 'Raw';
   map: google.maps.Map;
-  debug = false;
+  debug = true;
   menuSlider = false;
 
   private positionMarker: google.maps.Marker;
