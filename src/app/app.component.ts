@@ -22,6 +22,7 @@ import { PlaceMarkerService } from './services/marker/place-marker.service';
 export class AppComponent implements OnInit {
   title = 'Raw';
   map: google.maps.Map;
+  menuSlider = false;
 
   private positionMarker: google.maps.Marker;
   private targetMarker: google.maps.Marker;
@@ -94,6 +95,16 @@ export class AppComponent implements OnInit {
         alert('Fehler bei der Positionsermittlung');
       });
   }
+
+  public navClicked() {
+        console.log('NavClicked');
+        if (this.menuSlider === true) {
+          this.menuSlider = false;
+        } else {
+          this.menuSlider = true;
+        }
+  }
+
 }
 
 
