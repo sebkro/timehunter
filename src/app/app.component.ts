@@ -120,12 +120,11 @@ export class AppComponent implements OnInit {
         for (let i = 0; i < this.blanks.length; i++) {
           const distance = this.locationService.calcDistance(this.blanks[i].latitude, this.blanks[i].longitude,
             position.latitude, position.longitude);
-            const maxDisance = this.debug ? 1 : this.MAX_DISTANCE_IN_KM;
-            if (distance >= maxDisance) {
+            if (distance >= this.MAX_DISTANCE_IN_KM) {
               newBlanks[newBlanks.length] = this.blanks[i];
               newBlanksMarker[newBlanksMarker.length] = this.blanksMarker[i];
             } else {
-              this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsBlank(this.blanksMarker[i]);
+              this.blanksMarker[i].setMap(null);
             }
         }
         this.blanks = newBlanks;
@@ -136,6 +135,14 @@ export class AppComponent implements OnInit {
 
     targetMarkerClicked() {
       this.handleTargetReached();
+    }
+
+    blankMarkerClicked() {
+      if (this.blanks && this.blanks.length > 0) {
+        this.blanksMarker[0].setMap(null);
+        this.blanks.splice(0, 1);
+        this.blanksMarker.splice(0, 1);
+      }
     }
 
     public handleTargetReached() {
@@ -153,8 +160,9 @@ export class AppComponent implements OnInit {
     private addMarkerForTargetAndBlanks() {
       if (this.blanksMarker) {
         this.blanksMarker.forEach(elem => {
-          this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsBlank(elem);
+          elem.setMap(null);
         });
+        this.blanksMarker = [];
       }
       if (this.targetMarker) {
         this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsTarget(this.targetMarker);
