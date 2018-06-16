@@ -1,14 +1,9 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { Component, OnInit, ViewChild } from '@angular/core';
+
+import { Location } from './data-model';
 import { LocationService } from './services/location/location.service';
 import { PlaceMarkerService } from './services/marker/place-marker.service';
-import { Component, ViewChild, OnInit, Inject } from '@angular/core';
-import { } from '@types/googlemaps';
-import {
-  trigger,
-  state,
-  style,
-  animate,
-  transition
-} from '@angular/animations';
 
 @Component({
   selector: 'app-root',
@@ -28,9 +23,16 @@ export class AppComponent implements OnInit {
   title = 'Raw';
   map: google.maps.Map;
 
-  positionMarker: google.maps.Marker;
+  private positionMarker: google.maps.Marker;
+  private targetMarker: google.maps.Marker;
+  private target: Location;
 
-  target: google.maps.LatLng;
+
+
+  readonly STARTING_POINT_KEY = 'startingPoint';
+  readonly BLANKS_KEY = 'blanks';
+  readonly TARGET_KEY = 'target';
+  readonly STATE_KEY = 'state';
 
 
   @ViewChild('gmap') gmapElement: any;
@@ -45,17 +47,36 @@ export class AppComponent implements OnInit {
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    this.locationService.findStartingPoint(53.5422562, 9.9891803).subscribe(res => {
-      alert(JSON.stringify(res));
-      this.locationService.getNextPoints(53.5422562, 9.9891803).subscribe(elem => alert(JSON.stringify(elem)));
-    });
+
     this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
+
     if (navigator.geolocation) {
-      this.updatePosition();
+      this.updateUserPosition();
+      if (GameState.PRESTART === localStorage.getItem(this.STATE_KEY)) {
+        this.target = JSON.parse(localStorage.getItem(this.STARTING_POINT_KEY));
+        this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
+      } else if (GameState.RUNNING === localStorage.getItem(this.STATE_KEY)) {
+        console.log('GameState Running');
+
+      } else {
+        this.initGame();
+      }
     }
   }
 
-  private updatePosition() {
+  private initGame() {
+    navigator.geolocation.getCurrentPosition(
+      success => {
+        this.locationService.findStartingPoint(success.coords.latitude, success.coords.longitude).subscribe(result => {
+          localStorage.setItem(this.STARTING_POINT_KEY, JSON.stringify(result));
+          localStorage.setItem(this.STATE_KEY, GameState.PRESTART);
+          this.target = result;
+          this.targetMarker = this.markerService.setTargetPositionMarker(this.map, result.latitude, result.longitude);
+        });
+    });
+  }
+
+  private updateUserPosition() {
     navigator.geolocation.getCurrentPosition(
       success => {
         if (this.positionMarker) {
@@ -65,12 +86,19 @@ export class AppComponent implements OnInit {
           this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
           this.positionMarker = this.markerService.setOwnPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
         }
-        console.log('new Position: ' + success.coords.latitude + ' ' + success.coords.longitude);
-        setTimeout(() => this.updatePosition(), 5000);
+        if (this.target) {
+          console.log('new Position: ' + success.coords.latitude + ' ' + success.coords.longitude);
+        }
+        setTimeout(() => this.updateUserPosition(), 15000);
       }, error => {
-        alert('bla');
+        alert('Fehler bei der Positionsermittlung');
       });
-
   }
+}
 
+
+enum GameState {
+  NOT_INITIALIZED = 'NOT_INITIALIZED',
+  PRESTART = 'PRESTART',
+  RUNNING = 'RUNNING'
 }
