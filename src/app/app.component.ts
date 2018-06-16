@@ -30,6 +30,7 @@ export class AppComponent implements OnInit {
   private targetMarker: google.maps.Marker;
   private blanks: Location[] = [];
   private blanksMarker: google.maps.Marker[] = [];
+  private oldMarkers: google.maps.Marker[] = [];
   private state: GameState;
 
 
@@ -124,7 +125,7 @@ export class AppComponent implements OnInit {
               newBlanks[newBlanks.length] = this.blanks[i];
               newBlanksMarker[newBlanksMarker.length] = this.blanksMarker[i];
             } else {
-              this.blanksMarker[i].setMap(null);
+              this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsBlank(this.blanksMarker[i]);
             }
         }
         this.blanks = newBlanks;
@@ -132,9 +133,6 @@ export class AppComponent implements OnInit {
       }
     }
 
-    public handleBlankReached(marker: google.maps.Marker) {
-      marker.setMap(null);
-    }
 
     targetMarkerClicked() {
       this.handleTargetReached();
@@ -154,10 +152,12 @@ export class AppComponent implements OnInit {
 
     private addMarkerForTargetAndBlanks() {
       if (this.blanksMarker) {
-        this.blanksMarker.forEach(elem => elem.setMap(null));
+        this.blanksMarker.forEach(elem => {
+          this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsBlank(elem);
+        });
       }
       if (this.targetMarker) {
-        this.targetMarker.setMap(null);
+        this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsTarget(this.targetMarker);
       }
 
       this.blanks.forEach(blank => {
@@ -182,6 +182,9 @@ export class AppComponent implements OnInit {
       }
       if (this.blanksMarker) {
         this.blanksMarker.forEach(elem => elem.setMap(null));
+      }
+      if (this.oldMarkers) {
+        this.oldMarkers.forEach(elem => elem.setMap(null));
       }
       localStorage.clear();
       this.initGame();

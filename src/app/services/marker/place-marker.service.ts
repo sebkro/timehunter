@@ -27,4 +27,14 @@ export class PlaceMarkerService {
     });
   }
 
+  markMarkerAsBlank(marker: google.maps.Marker): google.maps.Marker {
+    marker.setIcon('assets/icons/marker_falsch.png');
+    return marker;
+  }
+
+  markMarkerAsTarget(marker: google.maps.Marker): google.maps.Marker {
+    marker.setIcon('assets/icons/marker_richtig.png');
+    return marker;
+  }
+
 }
