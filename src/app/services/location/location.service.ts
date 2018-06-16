@@ -20,10 +20,10 @@ export class LocationService {
     }
 
     findStartingPoint(latitude: number, longitude: number): Observable<Location> {
-      const query = latitude + '/' + longitude + '/' + this.getUserId();
+      const query = longitude + '/' + latitude + '/' + this.getUserId();
 
       return this.http
-      .get(this.apiUrl + '/startingpoint2/' + query, { headers: this.jsonHeaders })
+      .get(this.apiUrl + '/startingpoint/' + query, { headers: this.jsonHeaders })
       .map(response => response.json())
       .map(rawLocation => LocationFactory.fromObject(rawLocation));
     }
