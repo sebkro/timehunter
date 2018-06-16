@@ -29,7 +29,7 @@ export class LocationService {
     }
 
     getNextPoints(latitude: number, longitude: number): Observable<Array<Location>> {
-      const query = latitude + '/' + longitude + '/' + this.getUserId();
+      const query = longitude + '/' + latitude + '/' + this.getUserId();
 
       return this.http
       .get(this.apiUrl + '/nextpoints/' + query, { headers: this.jsonHeaders })

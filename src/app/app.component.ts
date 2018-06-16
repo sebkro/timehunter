@@ -22,12 +22,13 @@ import { PlaceMarkerService } from './services/marker/place-marker.service';
 export class AppComponent implements OnInit {
   title = 'Raw';
   map: google.maps.Map;
+  debug = true;
 
   private positionMarker: google.maps.Marker;
   private target: Location;
   private targetMarker: google.maps.Marker;
-  private blanks: Location[];
-  private blanksMarker: google.maps.Marker[];
+  private blanks: Location[] = [];
+  private blanksMarker: google.maps.Marker[] = [];
   private state: GameState;
 
 
@@ -61,7 +62,9 @@ export class AppComponent implements OnInit {
         const marker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
         this.targetMarker = marker;
       } else if (GameState.RUNNING === localStorage.getItem(this.STATE_KEY)) {
-        console.log('GameState Running');
+        this.blanks = JSON.parse(localStorage.getItem(this.BLANKS_KEY));
+        this.target = JSON.parse(localStorage.getItem(this.TARGET_KEY));
+        this.addMarkerForTargetAndBlanks();
       } else {
         this.initGame();
       }
@@ -91,7 +94,8 @@ export class AppComponent implements OnInit {
           this.positionMarker = this.markerService.setOwnPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
         }
         this.checkIfTargetReached(success.coords);
-        setTimeout(() => this.updateUserPosition(), 15000);
+        this.checkIfBlankReached(success.coords);
+        setTimeout(() => this.updateUserPosition(), 5000);
       }, error => {
         alert('Fehler bei der Positionsermittlung');
       });
@@ -107,28 +111,59 @@ export class AppComponent implements OnInit {
       }
     }
 
+    private checkIfBlankReached(position: Coordinates) {
+      if (this.blanks) {
+        const newBlanks = [];
+        const newBlanksMarker = [];
+        for (let i = 0; i < this.blanks.length; i++) {
+          const distance = this.locationService.calcDistance(this.blanks[i].latitude, this.blanks[i].longitude,
+            position.latitude, position.longitude);
+            const maxDisance = this.debug ? 1 : this.MAX_DISTANCE_IN_KM;
+            if (distance >= maxDisance) {
+              newBlanks[newBlanks.length] = this.blanks[i];
+              newBlanksMarker[newBlanksMarker.length] = this.blanksMarker[i];
+            } else {
+              this.blanksMarker[i].setMap(null);
+            }
+        }
+        this.blanks = newBlanks;
+        this.blanksMarker = newBlanksMarker;
+      }
+    }
+
     public handleBlankReached(marker: google.maps.Marker) {
       marker.setMap(null);
+    }
+
+    targetMarkerClicked() {
+      this.handleTargetReached();
     }
 
     public handleTargetReached() {
       this.locationService.getNextPoints(this.target.latitude, this.target.longitude).subscribe(newLocations => {
         localStorage.setItem(this.STATE_KEY, GameState.RUNNING);
         localStorage.removeItem(this.STARTING_POINT_KEY);
-        this.blanks = this.blanks  = newLocations.filter(location => location.niete);
+        this.blanks = newLocations.filter(location => location.niete);
         this.target = newLocations.find(location => !location.niete);
         localStorage.setItem(this.BLANKS_KEY, JSON.stringify(this.blanks));
         localStorage.setItem(this.TARGET_KEY, JSON.stringify(this.target));
-        this.blanksMarker.forEach(elem => elem.setMap(null));
-        this.targetMarker.setMap(null);
-        this.blanks.forEach(blank => {
-          const blankMarker = this.markerService.setTargetPositionMarker(this.map, blank.latitude, blank.longitude);
-          this.blanksMarker[this.blanksMarker.length] = blankMarker;
-        });
-        this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
-        this.targetMarker.addListener('click', this.handleBlankReached);
-
+        this.addMarkerForTargetAndBlanks();
       });
+    }
+
+    private addMarkerForTargetAndBlanks() {
+      if (this.blanksMarker) {
+        this.blanksMarker.forEach(elem => elem.setMap(null));
+      }
+      if (this.targetMarker) {
+        this.targetMarker.setMap(null);
+      }
+
+      this.blanks.forEach(blank => {
+        const blankMarker = this.markerService.setTargetPositionMarker(this.map, blank.latitude, blank.longitude);
+        this.blanksMarker[this.blanksMarker.length] = blankMarker;
+      });
+      this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
     }
 
 }
