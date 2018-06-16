@@ -22,6 +22,7 @@ export class PlaceMarkerService {
     return new google.maps.Marker({
       position: new google.maps.LatLng(latitude, longitude),
       map: googleMap,
+      icon: 'assets/icons/marker_unbekannt.png',
       title: 'Target!'
     });
   }
