@@ -9,10 +9,12 @@ import { HttpModule } from '@angular/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { GameComponent } from './components/game/game.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+    GameComponent,
   ],
   imports: [
     BrowserModule,
