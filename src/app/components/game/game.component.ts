@@ -19,12 +19,14 @@ export class GameComponent implements OnInit {
   private targetMarker: google.maps.Marker;
   private blanks: Location[] = [];
   private blanksMarker: google.maps.Marker[] = [];
-  private oldMarkers: google.maps.Marker[] = [];
+  private lastTargetMarkers: google.maps.Marker[] = [];
+  private lastTargets: Location[] = [];
 
-  readonly STARTING_POINT_KEY = 'startingPoint';
-  readonly BLANKS_KEY = 'blanks';
-  readonly TARGET_KEY = 'target';
-  readonly STATE_KEY = 'state';
+  readonly STARTING_POINT_KEY = 'game_startingPoint';
+  readonly BLANKS_KEY = 'game_blanks';
+  readonly TARGET_KEY = 'game_target';
+  readonly LAST_TARGETS_KEY = 'game_lastTargets';
+  readonly STATE_KEY = 'game_state';
   readonly MAX_DISTANCE_IN_KM = 0.05;
 
   constructor(private markerService: PlaceMarkerService,
@@ -62,7 +64,9 @@ export class GameComponent implements OnInit {
           localStorage.setItem(this.STARTING_POINT_KEY, JSON.stringify(result));
           localStorage.setItem(this.STATE_KEY, GameState.PRESTART);
           this.target = result;
-          this.targetMarker = this.markerService.setTargetPositionMarker(this.map, result.latitude, result.longitude);
+          this.blanks = [];
+          this.lastTargets = [];
+          this.addMarkerForTargetAndBlanks();
         });
       });
   }
@@ -72,11 +76,11 @@ export class GameComponent implements OnInit {
       success => {
         if (this.positionMarker) {
           this.positionMarker.setPosition(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
-          this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
         } else {
-          this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
           this.positionMarker = this.markerService.setOwnPositionMarker(this.map, success.coords.latitude, success.coords.longitude);
         }
+        this.map.setCenter(new google.maps.LatLng(success.coords.latitude, success.coords.longitude));
+
         this.checkIfTargetReached(success.coords);
         this.checkIfBlankReached(success.coords);
         setTimeout(() => this.updateUserPosition(), 5000);
@@ -98,19 +102,15 @@ export class GameComponent implements OnInit {
   private checkIfBlankReached(position: Coordinates) {
     if (this.blanks) {
       const newBlanks = [];
-      const newBlanksMarker = [];
       for (let i = 0; i < this.blanks.length; i++) {
         const distance = this.locationService.calcDistance(this.blanks[i].latitude, this.blanks[i].longitude,
           position.latitude, position.longitude);
         if (distance >= this.MAX_DISTANCE_IN_KM) {
           newBlanks[newBlanks.length] = this.blanks[i];
-          newBlanksMarker[newBlanksMarker.length] = this.blanksMarker[i];
-        } else {
-          this.blanksMarker[i].setMap(null);
         }
       }
       this.blanks = newBlanks;
-      this.blanksMarker = newBlanksMarker;
+      this.addMarkerForTargetAndBlanks();
     }
   }
 
@@ -121,9 +121,8 @@ export class GameComponent implements OnInit {
 
   blankMarkerClicked() {
     if (this.blanks && this.blanks.length > 0) {
-      this.blanksMarker[0].setMap(null);
       this.blanks.splice(0, 1);
-      this.blanksMarker.splice(0, 1);
+      this.addMarkerForTargetAndBlanks();
     }
   }
 
@@ -131,10 +130,12 @@ export class GameComponent implements OnInit {
     this.locationService.getNextPoints(this.target.latitude, this.target.longitude).subscribe(newLocations => {
       localStorage.setItem(this.STATE_KEY, GameState.RUNNING);
       localStorage.removeItem(this.STARTING_POINT_KEY);
+      this.lastTargets[this.lastTargets.length] = this.target;
       this.blanks = newLocations.filter(location => location.niete);
       this.target = newLocations.find(location => !location.niete);
       localStorage.setItem(this.BLANKS_KEY, JSON.stringify(this.blanks));
       localStorage.setItem(this.TARGET_KEY, JSON.stringify(this.target));
+      localStorage.setItem(this.LAST_TARGETS_KEY, JSON.stringify(this.lastTargets));
       this.addMarkerForTargetAndBlanks();
     });
   }
@@ -146,8 +147,8 @@ export class GameComponent implements OnInit {
     if (this.blanksMarker) {
       this.blanksMarker.forEach(elem => elem.setMap(null));
     }
-    if (this.oldMarkers) {
-      this.oldMarkers.forEach(elem => elem.setMap(null));
+    if (this.lastTargetMarkers) {
+      this.lastTargetMarkers.forEach(elem => elem.setMap(null));
     }
     localStorage.clear();
     this.initGame();
@@ -160,15 +161,31 @@ export class GameComponent implements OnInit {
       });
       this.blanksMarker = [];
     }
-    if (this.targetMarker) {
-      this.oldMarkers[this.oldMarkers.length] = this.markerService.markMarkerAsTarget(this.targetMarker);
+    if (this.lastTargetMarkers) {
+      this.lastTargetMarkers.forEach(elem => {
+        elem.setMap(null);
+      });
+      this.lastTargetMarkers = [];
     }
-
-    this.blanks.forEach(blank => {
-      const blankMarker = this.markerService.setTargetPositionMarker(this.map, blank.latitude, blank.longitude);
-      this.blanksMarker[this.blanksMarker.length] = blankMarker;
-    });
-    this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
+    if (this.targetMarker) {
+      this.targetMarker.setMap(null);
+    }
+    if (this.blanks) {
+      this.blanks.forEach(blank => {
+        const blankMarker = this.markerService.setTargetPositionMarker(this.map, blank.latitude, blank.longitude);
+        this.blanksMarker[this.blanksMarker.length] = blankMarker;
+      });
+    }
+    if (this.target) {
+      this.targetMarker = this.markerService.setTargetPositionMarker(this.map, this.target.latitude, this.target.longitude);
+    }
+    if (this.lastTargets) {
+      this.lastTargets.forEach(elem => {
+        const marker = this.markerService.setTargetPositionMarker(this.map, elem.latitude, elem.longitude);
+        this.lastTargetMarkers[this.lastTargetMarkers.length] = marker;
+        this.markerService.markMarkerAsTarget(marker);
+      });
+    }
   }
 
 }

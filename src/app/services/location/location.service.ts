@@ -1,3 +1,5 @@
+import { Location } from './../../data-model';
+import { IdService } from './../id/id.service';
 import { Observable } from 'rxjs/Observable';
 import { Injectable, Inject } from '@angular/core';
 import { Location, LocationFactory } from '../../data-model';
@@ -10,11 +12,11 @@ import 'rxjs/add/observable/of';
 export class LocationService {
 
   private jsonHeaders;
-  private possibleIdChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   constructor(
     @Inject('LOCATION_SERVICE_URL') private apiUrl: string,
-    private http: Http) {
+    private http: Http,
+    private idService: IdService) {
       this.jsonHeaders = new Headers();
       this.jsonHeaders.append('Content-Type', 'application/json');
     }
@@ -26,6 +28,15 @@ export class LocationService {
       .get(this.apiUrl + '/startingpoint/' + query, { headers: this.jsonHeaders })
       .map(response => response.json())
       .map(rawLocation => LocationFactory.fromObject(rawLocation));
+    }
+
+    createPlayzone(name: string, targets: Location[]) {
+      const query = targets[0].longitude + '/' + targets[0].latitude + '/' + name + '/default_user';
+      const body = targets.map(elem => new CreateLocation(elem.latitude, elem.longitude));
+
+
+      this.http
+      .put(this.apiUrl + '/createnewplayzone/' + query, body, { headers: this.jsonHeaders }).subscribe();
     }
 
     getNextPoints(latitude: number, longitude: number): Observable<Array<Location>> {
@@ -42,10 +53,7 @@ export class LocationService {
     private getUserId() {
       let userId = window.localStorage.getItem('userId');
       if (!userId) {
-        userId = '';
-        for (let i = 0; i < 30; i++) {
-          userId += this.possibleIdChars.charAt(Math.floor(Math.random() * this.possibleIdChars.length));
-        }
+        userId = this.idService.createId(30);
         window.localStorage.setItem('userId', userId);
       }
       return userId;
@@ -67,4 +75,14 @@ export class LocationService {
       return n * Math.PI / 180;
     }
 
+}
+
+export class CreateLocation {
+  lat: number;
+  lon: number;
+
+  constructor(latitude: number, longitude: number) {
+      this.lat = latitude;
+      this.lon = longitude;
+  }
 }
