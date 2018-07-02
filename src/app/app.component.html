@@ -3,7 +3,7 @@
   <a href="javascript:void(0)" class="closebtn" (click) = "navClicked()">&times;</a>
 
   <div class="overlay-content">
-      <a (click)="restartGame()">Restart Game</a>
+      <a *ngIf="gameActive" (click)="restartGame()">Spiel neu starten</a>
   </div>
 
 </div>

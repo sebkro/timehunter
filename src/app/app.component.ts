@@ -5,6 +5,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Location } from './data-model';
 import { LocationService } from './services/location/location.service';
 import { PlaceMarkerService } from './services/marker/place-marker.service';
+import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -22,13 +23,19 @@ import { PlaceMarkerService } from './services/marker/place-marker.service';
 })
 export class AppComponent implements OnInit {
   menuSlider = false;
+  gameActive = false;
 
   @ViewChild(GameComponent)
   gameComponent: GameComponent;
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit() {
+    this.router.events.forEach((event) => {
+      if (event instanceof NavigationEnd) {
+        this.gameActive = event.url === '/play';
+      }
+    });
   }
 
 

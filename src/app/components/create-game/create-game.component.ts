@@ -55,7 +55,7 @@ export class CreateGameComponent implements OnInit {
   onSubmit() {
     const markers = this.markers
       .map(elem => new Location(elem.getPosition().lat(), elem.getPosition().lng(), false));
-    this.locationService.createPlayzone(this.model.name, markers);
+    this.locationService.createGame(this.model.name, markers);
   }
 
 }
